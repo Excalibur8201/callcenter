@@ -2,8 +2,8 @@ package com.cgg.callcenter;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,26 +24,26 @@ public class DispatcherTest extends TestCase {
 
 	private Dispatcher dispatcher;
 
-	private List<Employee> operators;
+	private Queue<Employee> operators;
 
-	private List<Employee> supervisors;
+	private Queue<Employee> supervisors;
 
-	private List<Employee> directors;
+	private Queue<Employee> directors;
 
-	private List<Call> calls;
+	private Queue<Call> calls;
 
 	@Before
 	public void setUp() {
 		dispatcher = new Dispatcher();
-		operators = new ArrayList<Employee>();
-		supervisors = new ArrayList<Employee>();
-		directors = new ArrayList<Employee>();
-		calls = new ArrayList<Call>();
+		operators = new LinkedBlockingQueue<Employee>();
+		supervisors = new LinkedBlockingQueue<Employee>();
+		directors = new LinkedBlockingQueue<Employee>();
+		calls = new LinkedBlockingQueue<Call>();
 		try {
 			fillEmployees();
 			fillCalls();
 		} catch (Exception e) {
-			System.out.println("Error loading data files: ");
+			System.out.println("Error loading data files.");
 			e.printStackTrace();
 		}
 	}
@@ -59,7 +59,7 @@ public class DispatcherTest extends TestCase {
 		BufferedReader br = null;
 		try {
 
-			br = new BufferedReader(new FileReader("employess.csv"));
+			br = new BufferedReader(new FileReader("/src/test/resources/employess.csv"));
 			String line = null;
 
 			while ((line = br.readLine()) != null) {
@@ -99,7 +99,7 @@ public class DispatcherTest extends TestCase {
 		BufferedReader br = null;
 		try {
 
-			br = new BufferedReader(new FileReader("calls.csv"));
+			br = new BufferedReader(new FileReader("resources/calls.csv"));
 			String line = null;
 
 			while ((line = br.readLine()) != null) {
