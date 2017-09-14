@@ -13,7 +13,7 @@ import com.cgg.callcenter.model.Employee;
 
 /**
  * 
- * Class for calls dispatching.
+ * Clase que se encarga de la atencion de llamadas..
  *
  */
 public class Dispatcher {
@@ -31,7 +31,7 @@ public class Dispatcher {
 	}
 
 	/**
-	 * Dispatch calls concurrently
+	 * Metodo que se encarga de atender las llamadas de forma concurrente.
 	 */
 	public void dispatchCalls(List<Call> calls) {
 
@@ -115,6 +115,8 @@ public class Dispatcher {
 	private void attendCall(ExecutorService executor, CallAttendance callAttendance) {
 
 		Random ran = new Random();
+
+		// Las llamadas duran entre 5 y 10 seg cada una
 		int x = ran.nextInt(6) + 5;
 
 		Call call = callAttendance.getCall();

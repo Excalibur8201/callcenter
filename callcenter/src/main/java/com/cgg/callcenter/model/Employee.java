@@ -2,7 +2,7 @@ package com.cgg.callcenter.model;
 
 /**
  * 
- * Class that represents employess' personal information
+ * Clase que representa la informacion personal de los empleados.
  *
  */
 public class Employee {
