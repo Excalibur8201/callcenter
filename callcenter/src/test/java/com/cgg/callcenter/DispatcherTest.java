@@ -1,10 +1,12 @@
 package com.cgg.callcenter;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,13 +58,12 @@ public class DispatcherTest extends TestCase {
 	}
 
 	private void fillEmployees() throws Exception {
-		BufferedReader br = null;
 		try {
 
-			br = new BufferedReader(new FileReader("/src/test/resources/employess.csv"));
-			String line = null;
+			List<String> contents = IOUtils.readLines(
+					this.getClass().getClassLoader().getResourceAsStream("employees.csv"), Charset.defaultCharset());
 
-			while ((line = br.readLine()) != null) {
+			for (String line : contents) {
 				String[] values = line.split(",");
 				Employee employee = new Employee();
 				employee.setName(values[0]);
@@ -84,39 +85,26 @@ public class DispatcherTest extends TestCase {
 				}
 
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			throw new Exception(e);
-		} finally {
-			try {
-				br.close();
-			} catch (Exception ex) {
-				throw new Exception(ex);
-			}
 		}
 	}
 
 	private void fillCalls() throws Exception {
-		BufferedReader br = null;
 		try {
 
-			br = new BufferedReader(new FileReader("resources/calls.csv"));
-			String line = null;
+			List<String> contents = IOUtils.readLines(this.getClass().getClassLoader().getResourceAsStream("calls.csv"),
+					Charset.defaultCharset());
 
-			while ((line = br.readLine()) != null) {
+			for (String line : contents) {
 				String[] values = line.split(",");
 				Call call = new Call();
 				call.setNumber(values[0]);
 				calls.add(call);
 			}
 
-		} catch (Exception e) {
+		} catch (IOException e) {
 			throw new Exception(e);
-		} finally {
-			try {
-				br.close();
-			} catch (Exception ex) {
-				throw new Exception(ex);
-			}
 		}
 	}
 }
