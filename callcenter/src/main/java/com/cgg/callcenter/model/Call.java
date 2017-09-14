@@ -2,7 +2,7 @@ package com.cgg.callcenter.model;
 
 /**
  * 
- * Clase que representa una llamada entrante.
+ * Clase que modela una llamada entrante.
  *
  */
 public class Call {
