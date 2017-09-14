@@ -2,6 +2,7 @@ package com.cgg.callcenter;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -32,15 +33,14 @@ public class DispatcherTest extends TestCase {
 
 	private Queue<Employee> directors;
 
-	private Queue<Call> calls;
+	private List<Call> calls;
 
 	@Before
 	public void setUp() {
-		dispatcher = new Dispatcher();
 		operators = new LinkedBlockingQueue<Employee>();
 		supervisors = new LinkedBlockingQueue<Employee>();
 		directors = new LinkedBlockingQueue<Employee>();
-		calls = new LinkedBlockingQueue<Call>();
+		calls = new ArrayList<Call>();
 		try {
 			fillEmployees();
 			fillCalls();
@@ -48,14 +48,22 @@ public class DispatcherTest extends TestCase {
 			System.out.println("Error loading data files.");
 			e.printStackTrace();
 		}
+		dispatcher = new Dispatcher(operators, supervisors, directors);
 	}
 
 	@Test
-	public void testCalls() {
-
-		dispatcher.dispatchCalls(operators, supervisors, directors, calls);
+	public void test10Calls() {
+		List<Call> subCalls = calls.subList(0, 10);
+		dispatcher.dispatchCalls(subCalls);
 
 	}
+
+	 @Test
+	 public void testAllCalls() {
+	
+		 dispatcher.dispatchCalls(calls);
+	
+	 }
 
 	private void fillEmployees() throws Exception {
 		try {

@@ -4,53 +4,46 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.cgg.callcenter.model.Call;
 import com.cgg.callcenter.model.Employee;
 
 /**
  * 
- * @author claudio
+ * Class for calls dispatching.
  *
  */
 public class Dispatcher {
 
+	private Queue<Employee> operators;
+
+	private Queue<Employee> supervisors;
+
+	private Queue<Employee> directors;
+
+	public Dispatcher(Queue<Employee> operators, Queue<Employee> supervisors, Queue<Employee> directors) {
+		this.operators = operators;
+		this.supervisors = supervisors;
+		this.directors = directors;
+	}
+
 	/**
 	 * Dispatch calls concurrently
 	 */
-	public void dispatchCalls(Queue<Employee> operators, Queue<Employee> supervisors, Queue<Employee> directors,
-			Queue<Call> calls) {
+	public void dispatchCalls(List<Call> calls) {
 
 		int numThreads = 10;
 		ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
 
-		Call call = null;
 		Employee operator, supervisor, director;
 		List<CallAttendance> callAttendances = new ArrayList<CallAttendance>();
 
 		int i = 0;
 
-		while ((call = calls.poll()) != null) {
-
-			// if (operators.size() > 0) {
-			// Employee operator = operators.poll();
-			// attendCall(executorService, operator, call);
-			// operators.add(operator);
-			// } else if (supervisors.size() > 0) {
-			// Employee supervisor = supervisors.poll();
-			// attendCall(executorService, supervisor, call);
-			// supervisors.add(supervisor);
-			// } else if (directors.size() > 0) {
-			// Employee director = directors.poll();
-			// attendCall(executorService, director, call);
-			// directors.add(director);
-			// }
+		for (Call call : calls) {
 
 			if ((operator = operators.poll()) != null) {
 				callAttendances.add(new CallAttendance(call, operator));
@@ -59,11 +52,12 @@ public class Dispatcher {
 			} else if ((director = directors.poll()) != null) {
 				callAttendances.add(new CallAttendance(call, director));
 			}
+
 			i++;
 
-			if (i == numThreads) {
+			if ((operators.size() == 0 && supervisors.size() == 0 && directors.size() == 0) || (i == numThreads)) {
 				for (CallAttendance callAttendance : callAttendances) {
-					attendCall(executorService, callAttendance, operators, supervisors, directors);
+					attendCall(executorService, callAttendance);
 				}
 				callAttendances.clear();
 				i = 0;
@@ -71,11 +65,18 @@ public class Dispatcher {
 
 		}
 
+		// Esperar q procesar el volumen de llamdas
+		try {
+
+			Thread.sleep((calls.size() * 10000 / numThreads) + 10000);
+		} catch (InterruptedException e) {
+		}
+
 		executorService.shutdownNow();
 
 		try {
 			if (!executorService.awaitTermination(100, TimeUnit.MICROSECONDS)) {
-				System.out.println("Still waiting...");
+				System.out.println("Esperando a que finalicen todas las tareas ...");
 				System.exit(0);
 			}
 		} catch (InterruptedException e) {
@@ -111,39 +112,25 @@ public class Dispatcher {
 
 	}
 
-	private void attendCall(ExecutorService executor, CallAttendance callAttendance, Queue<Employee> operators,
-			Queue<Employee> supervisors, Queue<Employee> directors) {
+	private void attendCall(ExecutorService executor, CallAttendance callAttendance) {
 
 		Random ran = new Random();
 		int x = ran.nextInt(6) + 5;
 
-		long endNanos = System.nanoTime() + (x * 1000000000);
-
 		Call call = callAttendance.getCall();
 		Employee employee = callAttendance.getEmployee();
 
-		Future<?> f = executor.submit(new Runnable() {
+		executor.submit(new Runnable() {
 			public void run() {
-				try {
-					Thread.sleep(x * 10000);
-				} catch (Exception e) {
+
+				long endTime = System.currentTimeMillis() + (x * 1000);
+				while (System.currentTimeMillis() < endTime) {
 				}
 				System.out.println("Llamada atendida de " + call.getNumber() + " por el "
 						+ employee.getEmployeeType().toString().toLowerCase() + " " + employee.getName() + " "
 						+ employee.getLastName() + ", con una duracion de : " + x + " segundos.");
 			}
 		});
-
-		long timeLeft = endNanos - System.nanoTime();
-
-		try {
-			f.get(timeLeft, TimeUnit.NANOSECONDS);
-		} catch (ExecutionException e) {
-		} catch (InterruptedException e) {
-
-		} catch (TimeoutException e) {
-			f.cancel(true);
-		}
 
 		switch (employee.getEmployeeType()) {
 		case OPERATOR:
